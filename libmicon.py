@@ -175,9 +175,9 @@ LINK_1000M	= 0x05
 class micon_api:
 	port = serial.Serial('/dev/ttyS1', 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
                         stopbits=serial.STOPBITS_ONE, timeout=0.1)
-	def __init__(self):
+	def __init__(self, debug=0):
 	##need to either figure out autodetect or take params
-
+		debug=debug
 		port = serial.Serial()
 
 	def calc_check_byte(self,bytes):
@@ -237,7 +237,7 @@ class micon_api:
 		print ("response: ", bytes(output).hex())
 		return output
 
-	def send_write_cmd(self, length, addrbyte, databytes=0x00):
+	def send_write_cmd(self, length, addrbyte, databytes=""):
 		#validate length or perhaps stop requiring it or something
 		if type(databytes) == int:
                         databytes = bytearray([databytes])
