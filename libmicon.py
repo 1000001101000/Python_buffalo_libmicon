@@ -174,7 +174,7 @@ LINK_1000M	= 0x05
 
 class micon_api:
 	port = serial.Serial('/dev/ttyS1', 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
-                        stopbits=serial.STOPBITS_ONE, timeout=0.1)
+                        stopbits=serial.STOPBITS_ONE, timeout=0.05)
 	def __init__(self, debug=0):
 	##need to either figure out autodetect or take params
 		debug=debug
@@ -248,11 +248,16 @@ class micon_api:
 			cmdbytes.append(databyte)
 		return self.send_cmd(cmdbytes)
 
-	def get_response(self):
+	def get_response(self, length=32):
 		##maybe add an option buffer size
 		##it would be nice to stop hitting the timout.
 		##we could also get cute and determine when to stop based on response
-		response = self.port.read(32)
+
+		#try reading the first byte and use it to determine the message length
+		response = self.port.read(1)
+
+		length = (response[0] & 0x7F) + 2
+		response += self.port.read(length)
 		return response
 
 	def cmd_sound(self, soundcmd):
