@@ -174,10 +174,11 @@ LINK_1000M	= 0x05
 
 class micon_api:
 	port = serial.Serial('/dev/ttyS1', 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
-                        stopbits=serial.STOPBITS_ONE, timeout=0.05)
-	def __init__(self, debug=0):
+                        stopbits=serial.STOPBITS_ONE, timeout=0.1)
+	debug = 0
+	def __init__(self, enable_debug=0):
 	##need to either figure out autodetect or take params
-		debug=debug
+		self.debug = enable_debug
 		port = serial.Serial()
 
 	def calc_check_byte(self,bytes):
@@ -207,17 +208,32 @@ class micon_api:
 	def send_cmd(self, cmdbytes):
 		response = 0xFF
 		cmdbytes.append(self.calc_check_byte(cmdbytes))
-		print ("sending : ", bytes(cmdbytes).hex()," ",self.calc_checksum(cmdbytes)," ...", end="")
+		if self.debug != 0:
+			print ("sending : ", bytes(cmdbytes).hex(),"\tchecksum: ",self.calc_checksum(cmdbytes),"\tlength: ",len(cmdbytes)-3)
 		for x in range(retry_count):
 			self.send_bytes(cmdbytes)
 			response = self.get_response()
 			if self.calc_checksum(response) == 0:
-				print ("OK")
-				print ("Response: ", bytes(response).hex())
-				print ("")
+				response_type=response[0] & 0x80
+				resp_len=response[0] & 0x7F
+				resp_data=response[2:2+resp_len]
+				resp_code=0
+				resp_str=""
+				if response_type == 0:
+					resp_code=response[2]
+					if resp_code == 0:
+						resp_str = "\tresponse code: " + hex(resp_code)
+					else:
+						resp_str = "\tresponse code: " + hex(resp_code) + " ERROR"
+				else:
+					resp_str= "\tvalue: " + bytes(resp_data).hex()
+				if self.debug != 0:
+					print ("response: ", bytes(response).hex(), "\tchecksum: ",self.calc_checksum(response), "\tlength: ", resp_len, resp_str)
+					print ("")
 				return response
+			print ("Invalid response, sending preamble and retrying")
 			self.send_preamble()
-		print ("Error")
+		print ("Failed to send command ",bytes(cmdbytes).hex())
 
 	def send_read_cmd(self, addrbyte):
 		cmdbytes=bytearray()
@@ -234,7 +250,6 @@ class micon_api:
 		output = bytearray()
 		for x in range(response_len):
 			output.append(response[x+2])
-		print ("response: ", bytes(output).hex())
 		return output
 
 	def send_write_cmd(self, length, addrbyte, databytes=""):
