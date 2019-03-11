@@ -5,6 +5,7 @@ import datetime
 import serial
 from serial import Serial
 
+serial_port = "/dev/ttyS1"
 retry_count = 2
 
 CMD_MODE_READ		= 0x80
@@ -173,7 +174,7 @@ LINK_1000M	= 0x05
 
 
 class micon_api:
-	port = serial.Serial('/dev/ttyS1', 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
+	port = serial.Serial(serial_port, 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
                         stopbits=serial.STOPBITS_ONE, timeout=0.1)
 	debug = 0
 	def __init__(self, enable_debug=0):
