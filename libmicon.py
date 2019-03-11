@@ -175,15 +175,18 @@ LINK_1000M	= 0x05
 
 class micon_api:
 	port = serial.Serial(serial_port, 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
-                        stopbits=serial.STOPBITS_ONE, timeout=0.1)
+	                 stopbits=serial.STOPBITS_ONE, timeout=0.1)
 	debug = 0
 	def __init__(self, enable_debug=0):
 	##need to either figure out autodetect or take params
 		self.debug = enable_debug
 		port = serial.Serial()
+		self.send_preamble()
 
 	def calc_check_byte(self,bytes):
 		checkbyte = 0x00
+		if type(bytes) == int:
+			bytes = bytearray([bytes])
 		for byte in bytes:
 			checkbyte += byte
 			checkbyte %= 256
@@ -194,6 +197,8 @@ class micon_api:
 
 	def calc_checksum(self,bytes):
 		checksum = 0x00
+		if type(bytes) == int:
+			bytes = bytearray([bytes])
 		for byte in bytes:
                 	checksum += byte
 		checksum%=256
@@ -204,16 +209,23 @@ class micon_api:
 
 	def send_preamble(self):
 		preamble = bytearray([0xFF]*32)
+		if self.debug != 0:
+			print ("Sending Preamble...")
 		self.send_bytes(preamble)
 
 	def send_cmd(self, cmdbytes):
-		response = 0xFF
+		response = bytearray()
 		cmdbytes.append(self.calc_check_byte(cmdbytes))
 		if self.debug != 0:
 			print ("sending : ", bytes(cmdbytes).hex(),"\tchecksum: ",self.calc_checksum(cmdbytes),"\tlength: ",len(cmdbytes)-3)
 		for x in range(retry_count):
 			self.send_bytes(cmdbytes)
 			response = self.get_response()
+			if type(response) == int:
+				response = bytearray([response])
+			if response is None:
+				print ("no response")
+				continue
 			if self.calc_checksum(response) == 0:
 				response_type=response[0] & 0x80
 				resp_len=response[0] & 0x7F
@@ -241,13 +253,19 @@ class micon_api:
 		cmdbytes.append(0x80)
 		cmdbytes.append(addrbyte)
 		response = self.send_cmd(cmdbytes)
+		if response is None:
+			print ("no response")
+			return
+		if len(response) == 0:
+			print ("No Response")
+			return
 		if (response[0] & 0x80) == 0:
 			print ("invalid response")
-			return False
+			return
 		response_len = response[0]^0x80
 		if (response_len != (len(response)-3)):
 			print ("invalid response")
-			return False
+			return
 		output = bytearray()
 		for x in range(response_len):
 			output.append(response[x+2])
@@ -264,15 +282,12 @@ class micon_api:
 			cmdbytes.append(databyte)
 		return self.send_cmd(cmdbytes)
 
-	def get_response(self, length=32):
-		##maybe add an option buffer size
-		##it would be nice to stop hitting the timout.
-		##we could also get cute and determine when to stop based on response
-
+	def get_response(self):
 		#try reading the first byte and use it to determine the message length
 		response = self.port.read(1)
-
-		length = (response[0] & 0x7F) + 2
+		length=32
+		if len(response) == 1:
+			length = (response[0] & 0x7F) + 2
 		response += self.port.read(length)
 		return response
 
