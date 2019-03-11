@@ -11,6 +11,7 @@ So far It has been tested on these model Terastations running Debian Stable:
 ### Installation:
 
 `apt-get install python3 python3-pip`
+
 `pip3-install pyserial`
 
 **Depending on the model you may need to change the serial port in libmicon.py, it's typically /dev/ttyS1 but on the TS3400 it is /dev/ttyS3. 
@@ -18,6 +19,7 @@ So far It has been tested on these model Terastations running Debian Stable:
 ### Usage:
 
 I've provided examples.py which demonstrates how to use most typical functions. It can be run either as:
+
 `./examples.py` or `python3 examples.py`
 
 To see the details of the messages being send and received enable debug mode by:
