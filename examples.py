@@ -6,6 +6,9 @@ import time
 
 test = libmicon.micon_api()
 
+##to enable debug info change to
+#test = libmicon.micon_api(1)
+
 ##update the date for the lcd display
 test.set_lcd_date()
 test.cmd_force_lcd_disp(libmicon.lcd_disp_date)
