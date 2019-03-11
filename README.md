@@ -8,6 +8,8 @@ So far It has been tested on these model Terastations running Debian Stable:
 * TS3000
 * TS5000
 
+***I'm still working on the TS1400, I can send commands successfully but am not receiving responses, considering the relatively few needed commands for the TS1400 I may just create a seperate version that only sends that subset of commands If I can't figure it out.
+
 ### Installation:
 
 `apt-get install python3 python3-pip`
