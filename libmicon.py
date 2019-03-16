@@ -5,8 +5,7 @@ import datetime
 import serial
 from serial import Serial
 
-serial_port = "/dev/ttyS1"
-retry_count = 2
+retry_count = 3
 
 CMD_MODE_READ		= 0x80
 
@@ -93,7 +92,7 @@ lcd_disp_buffer6		= 0x2e
 lcd_disp_buffer7		= 0x2f
 
 
-BZ_STOP	= 0x00
+BZ_STOP		= 0x00
 BZ_MACHINE	= 0x01
 BZ_BUTTON	= 0x02
 BZ_CONTINUE	= 0x03
@@ -122,10 +121,9 @@ DISP_LED	= [0x00,0x80]
 SATA_LED_ONOFF	= 0x58
 SATA_LED_BLINK	= 0x59
 
-SATA_ALL_LED	= [0xFF,0xFF] ##works for off but not on? 
+SATA_ALL_LED	= [0xFF,0xFF]
 SATA_ALL_GREEN	= [0x00,0xFF]
 SATA_ALL_RED	= [0xFF,0x00]
-SATA_ALL_RED  	= [0xFF,0x00]
 SATA1_RED	= [0x01,0x00]
 SATA2_RED	= [0x02,0x00]
 SATA3_RED       = [0x04,0x00]
@@ -174,13 +172,11 @@ LINK_1000M	= 0x05
 
 
 class micon_api:
-	port = serial.Serial(serial_port, 38400, serial.EIGHTBITS, serial.PARITY_EVEN,\
-	                 stopbits=serial.STOPBITS_ONE, timeout=0.1)
+	port = serial.Serial()
 	debug = 0
-	def __init__(self, enable_debug=0):
-	##need to either figure out autodetect or take params
+	def __init__(self, serial_port="/dev/ttyS1",enable_debug=0):
 		self.debug = enable_debug
-		port = serial.Serial()
+		self.port = serial.Serial(serial_port, 38400, serial.EIGHTBITS, serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=0.25)
 		self.send_preamble()
 
 	def calc_check_byte(self,bytes):
@@ -226,6 +222,9 @@ class micon_api:
 			if response is None:
 				print ("no response")
 				continue
+			if len(response) == 0:
+				print ("no response")
+				continue
 			if self.calc_checksum(response) == 0:
 				response_type=response[0] & 0x80
 				resp_len=response[0] & 0x7F
@@ -252,24 +251,25 @@ class micon_api:
 		cmdbytes=bytearray()
 		cmdbytes.append(0x80)
 		cmdbytes.append(addrbyte)
-		response = self.send_cmd(cmdbytes)
-		if response is None:
-			print ("no response")
-			return
-		if len(response) == 0:
-			print ("No Response")
-			return
-		if (response[0] & 0x80) == 0:
-			print ("invalid response")
-			return
-		response_len = response[0]^0x80
-		if (response_len != (len(response)-3)):
-			print ("invalid response")
-			return
-		output = bytearray()
-		for x in range(response_len):
-			output.append(response[x+2])
-		return output
+		for x in range(retry_count):
+			response = self.send_cmd(cmdbytes)
+			if response is None:
+				print ("no response")
+				continue
+			if len(response) == 0:
+				print ("No Response")
+				continue
+			if (response[0] & 0x80) == 0:
+				print ("invalid response")
+				continue
+			response_len = response[0]^0x80
+			if (response_len != (len(response)-3)):
+				print ("invalid response")
+				continue
+			output = bytearray()
+			for x in range(response_len):
+				output.append(response[x+2])
+			return output
 
 	def send_write_cmd(self, length, addrbyte, databytes=""):
 		#validate length or perhaps stop requiring it or something
