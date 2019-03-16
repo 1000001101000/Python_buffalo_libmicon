@@ -4,7 +4,7 @@ import libmicon
 import socket
 import time
 
-test = libmicon.micon_api()
+test = libmicon.micon_api("/dev/ttyS3",1)
 
 ##to enable debug info change to
 #test = libmicon.micon_api(1)
@@ -38,7 +38,7 @@ test.cmd_force_lcd_disp(libmicon.lcd_disp_diskcap)
 time.sleep(1)
 
 ##set custom lcd message
-test.set_lcd_buffer(libmicon.lcd_set_buffer0,"Terastation x86","   Debian 9.8")
+test.set_lcd_buffer(libmicon.lcd_set_buffer0,"Terastation ARM","   Debian")
 test.cmd_force_lcd_disp(libmicon.lcd_disp_buffer0)
 
 ##enable just the messages that we've configured so far.
@@ -52,16 +52,15 @@ test.send_write_cmd(0,libmicon.lcd_changemode_button)
 #test.send_write_cmd(0,libmicon.lcd_changemode_auto)
 
 ##turn off all sata leds then cycle through them
-test.cmd_set_sataled(libmicon.LED_OFF,libmicon.SATA_ALL_LED)
+#test.cmd_set_sataled(libmicon.LED_OFF,libmicon.SATA_ALL_LED)
 
-for led in [libmicon.SATA1_RED, libmicon.SATA2_RED, libmicon.SATA3_RED, libmicon.SATA4_RED,libmicon.SATA5_RED, libmicon.SATA6_RED, libmicon.SATA7_RED, libmicon.SATA8_RED]:
-	test.cmd_set_sataled(libmicon.LED_ON,led)
 
-time.sleep(0.5)
-test.cmd_set_sataled(libmicon.LED_OFF,libmicon.SATA_ALL_RED)
 
-for led in [libmicon.SATA1_GREEN, libmicon.SATA2_GREEN, libmicon.SATA3_GREEN, libmicon.SATA4_GREEN,libmicon.SATA5_GREEN, libmicon.SATA6_GREEN, libmicon.SATA7_GREEN, libmicon.SATA8_GREEN]:
-        test.cmd_set_sataled(libmicon.LED_ON,led)
+test.cmd_set_led(libmicon.LED_OFF,bytearray([0x00,0xF0]))
+for led in [libmicon.SATA5_GREEN, libmicon.SATA6_GREEN, libmicon.SATA7_GREEN, libmicon.SATA8_GREEN]:
+	test.cmd_set_led(libmicon.LED_ON,led)
+	time.sleep(1)
+test.cmd_set_led(libmicon.LED_OFF,bytearray([0x00,0xF0]))
 
 
 #turn off all LED then cycle through turning them on.
@@ -70,7 +69,7 @@ test.cmd_set_led(libmicon.LED_OFF,[0xFF,0x00])
 for led in [libmicon.POWER_LED, libmicon.INFO_LED, libmicon.ERROR_LED, libmicon.LAN1_LED, libmicon.LAN2_LED, libmicon.FUNC1_LED, libmicon.FUNC2_LED]:
 	test.cmd_set_led(libmicon.LED_OFF,led)
 	test.cmd_set_led(libmicon.LED_ON,led)
-	time.sleep(0.25)
+	time.sleep(0.5)
 	test.cmd_set_led(libmicon.LED_OFF,led)
 
 #cycle through all the backlight combinations
@@ -84,7 +83,7 @@ for level in [libmicon.LCD_BRIGHT_OFF,libmicon.LCD_BRIGHT_LOW,libmicon.LCD_BRIGH
 	time.sleep(0.25)
 
 #run some standalone commands
-test.send_write_cmd(0,libmicon.lcd_disp_animation)
+#test.send_write_cmd(0,libmicon.lcd_disp_animation)
 
 #try every possible sound setting.
 test.cmd_sound(libmicon.BZ_MUSIC2)
