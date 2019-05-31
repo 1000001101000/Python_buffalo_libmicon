@@ -1,31 +1,31 @@
 #!/usr/bin/python3
 
 import libmicon
-import socket
 import time
 
 test = libmicon.micon_api("/dev/ttyS1")
+#test = libmicon.micon_api("/dev/ttyS1",1)
 
-test.cmd_sound(BZ_MUSIC1)
 
-##to enable debug info change to
-#test = libmicon.micon_api(1)
-test.send_cmd(bytearray([0x02,0x50,0x0F,0x00]))
-test.send_cmd(bytearray([0x02,0x51,0x06,0x00]))
-#0x02 and 0x04 are ...pink power leds or something. the rest are gpio anyway
+##turn off all sata leds then cycle through them
+test.cmd_set_led(libmicon.LED_OFF,bytearray([0x00,0xF0]))
+for led in [libmicon.SATA5_GREEN, libmicon.SATA6_GREEN, libmicon.SATA7_GREEN, libmicon.SATA8_GREEN]:
+	test.cmd_set_led(libmicon.LED_ON,led)
+	time.sleep(1)
+test.cmd_set_led(libmicon.LED_OFF,bytearray([0x00,0xF0]))
 
-##all red drive leds on
-test.send_cmd(bytearray([0x02,0x50,0x00,0xF0]))
-test.send_cmd(bytearray([0x02,0x51,0x00,0xF0]))
 
-##all red drive leds off
-test.send_cmd(bytearray([0x02,0x50,0x00,0xF0]))
-test.send_cmd(bytearray([0x02,0x51,0x00,0x00]))
+#turn off all LED then cycle through turning them on.
+test.cmd_set_led(libmicon.LED_OFF,[0xFF,0x00])
 
-##red sata blink
-test.send_cmd(bytearray([0x02,0x50,0x00,0xF0]))
-test.send_cmd(bytearray([0x02,0x51,0x00,0xF0]))
-test.send_cmd(bytearray([0x02,0x52,0x00,0xF0]))
+for led in [libmicon.INFO_LED, libmicon.ERROR_LED]:
+	test.cmd_set_led(libmicon.LED_OFF,led)
+	test.cmd_set_led(libmicon.LED_ON,led)
+	time.sleep(1)
+	test.cmd_set_led(libmicon.LED_OFF,led)
+
+#play a sound
+test.cmd_sound(libmicon.BZ_MUSIC2)
 
 test.port.close()
 quit()
