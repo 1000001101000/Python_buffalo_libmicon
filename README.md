@@ -23,6 +23,7 @@ I've provided examples.py which demonstrates how to use most typical functions. 
 `./examples.py` or `python3 examples.py`
 
 To see the details of the messages being send and received enable debug mode by:
+
 `conn = libmicon.micon_api("/dev/ttyS1",1)`
 
 For more details about the communication format and the available commands see:
