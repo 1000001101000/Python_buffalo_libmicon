@@ -4,7 +4,7 @@ import libmicon
 import socket
 import time
 
-test = libmicon.micon_api("/dev/ttyS3",1)
+test = libmicon.micon_api("/dev/ttyS1",1)
 
 ##to enable debug info change to
 #test = libmicon.micon_api(1)
