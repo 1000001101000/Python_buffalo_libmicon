@@ -5,9 +5,10 @@ This library allows you to communicate with the onboard microcontroller which co
 
 So far It has been tested on these model Terastations running Debian Stable:
 * TS-WVHL/QVHL/6VHL/8VHL/RVHL
+* TS1000 Series (TS1200 except the TS1200)
 * TS3000 Series
 * TS5000 Series
-* TS1000 Series (TS1200 except the TS1200)
+
 
 
 ### Installation:
