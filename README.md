@@ -3,12 +3,12 @@ Python3 Library for communicating with the microcontroller on the Buffalo Terast
 
 This library allows you to communicate with the onboard microcontroller which controls the LCD Display, LEDs, buzzer and other funcitons on most models of Buffalo Terastation. It uses Python3 and the PySerial library.
 
-So far It has been tested on these model Terastations running Debian Stable:
+So far It has been tested on these model Terastations running Debian Stretch and Buster:
 * TS-WVHL/QVHL/6VHL/8VHL/RVHL
-* TS1000 Series (TS1200 except the TS1200)
+* TS1000 Series (except the TS1200)
 * TS3000 Series
 * TS5000 Series
-
+* TS-WXL/XL/RXL
 
 
 ### Installation:
