@@ -8,6 +8,7 @@ So far It has been tested on these model Terastations running Debian Stretch and
 * TS1000 Series (except the TS1200)
 * TS3000 Series
 * TS5000 Series
+* TS-XEL
 * TS-WXL/XL/RXL
 
 
