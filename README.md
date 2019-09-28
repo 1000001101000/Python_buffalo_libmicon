@@ -1,5 +1,5 @@
 # Python_buffalo_libmicon
-Python3 Library for communicating with the microcontroller on the Buffalo Terastation
+Python3 Library for communicating with the microcontroller on the Buffalo Terastation and some older Linkstations.
 
 This library allows you to communicate with the onboard microcontroller which controls the LCD Display, LEDs, buzzer and other funcitons on most models of Buffalo Terastation. It uses Python3 and the PySerial library.
 
@@ -10,6 +10,7 @@ So far It has been tested on these model Terastations running Debian Stretch and
 * TS5000 Series
 * TS-XEL
 * TS-WXL/XL/RXL
+* LS-GL
 
 
 ### Installation:
