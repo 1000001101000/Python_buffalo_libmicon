@@ -54,7 +54,7 @@ while True:
 			if os.path.exists(alt_sensor):
 				f = open(alt_sensor)
 				tmp_temp=f.read()
-				micon_temp=int(tmp_temp)/1000
+				micon_temp=int(int(tmp_temp)/1000)
 
 		##set speed based on thresholds
 		fan_speed=1
