@@ -8,7 +8,6 @@ import configparser
 import os
 
 config_file="/etc/micon_fan.conf"
-alt_sensor="/sys/devices/virtual/thermal/thermal_zone0/temp"
 
 config = configparser.ConfigParser()
 if os.path.exists(config_file):
@@ -34,7 +33,7 @@ for port in ["/dev/ttyS1","/dev/ttyS3"]:
 
 version=version.decode('utf-8')
 
-if ((version.find("TS-RXL") != -1) or (version.find("TS-MR") != -1) or (version.find("1400R") != -1)):
+if ((version.find("TS-RXL") != -1) or (version.find("TS-MR") != -1) or (version.find("1400R") != -1) or (version.find("RHTGL") != -1)):
 	med_temp=int(config['Rackmount']['MediumTempC'])
 	high_temp=int(config['Rackmount']['HighTempC'])
 	shutdown_temp=int(config['Rackmount']['ShutdownTempC'])
@@ -50,12 +49,6 @@ while True:
 	try:
 		test = libmicon.micon_api(port)
 		micon_temp=int.from_bytes(test.send_read_cmd(0x37),byteorder='big')
-		if (micon_temp == 0xF4):
-			if os.path.exists(alt_sensor):
-				f = open(alt_sensor)
-				tmp_temp=f.read()
-				micon_temp=int(int(tmp_temp)/1000)
-
 		##set speed based on thresholds
 		fan_speed=1
 		if micon_temp > med_temp:
@@ -68,18 +61,18 @@ while True:
 		if debug == "debug":
 			print("Fan Speed ",fan_speed," Temperature ",micon_temp,"C")
 
-		current_speed=int.from_bytes(test.send_read_cmd(0x33),byteorder='big')
+		current_speed=int.from_bytes(test.send_read_cmd(0x33),byteorder='big') + int.from_bytes(test.send_read_cmd(0x38),byteorder='big')
 		if current_speed==0:
 			print("Fan Stopped!")
-			test.set_lcd_buffer(libmicon.lcd_set_buffer0,"Warning:","Fan Stopped!!!!")
+			test.set_lcd_buffer(0x90,"Warning:","Fan Stopped!!!!")
 			test.cmd_force_lcd_disp(libmicon.lcd_disp_buffer0)
-			test.set_lcd_color(libmicon.LCD_COLOR_RED)
 			test.set_lcd_brightness(libmicon.LCD_BRIGHT_FULL)
 			test.cmd_sound(libmicon.BZ_MUSIC2)
+			if (version.find("HTGL") == -1):
+				test.set_lcd_color(libmicon.LCD_COLOR_RED)
 
 		test.port.close()
-	except Exception as e:
-		print(e)
+	except:
 		print("Fan get/set failed, retrying")
 		time.sleep(10)
 		continue
