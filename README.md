@@ -13,6 +13,7 @@ So far It has been tested on these model Terastations/Linkstations running Debia
 * TS-XEL (Terastation ES)
 * TS-WXL/XL/RXL (Terastation III)
 * TS-HTGL (Terastation II Pro)
+* TS-TGL (Terastation Pro)
 * LS-GL
 
 
