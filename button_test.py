@@ -13,7 +13,7 @@ while True:
 	test = libmicon.micon_api("/dev/ttyS1")
 	state=test.send_read_cmd(0x36)
 	if oldstate != state:
-		print("Button(s): ", end='')
+		print("Button Register = ",int.from_bytes(state,byteorder="big"),", Button(s): ", end='')
 		for button_num in range(8):
 			if state[0] & (2**button_num) == 0:
 				print(2**button_num," ", end='')
