@@ -422,6 +422,7 @@ class micon_api_v3:
 		output = bytearray()
 		output.extend(map(ord, message + "\r"))
 		self.port.write(output)
+		time.sleep(0.02)
 		return (self.recv_miconv3())
 
 	def recv_miconv3(self):
