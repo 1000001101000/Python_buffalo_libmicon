@@ -66,6 +66,7 @@ for port in ["/dev/ttyS1","/dev/ttyS3"]:
 	if micon_version:
 		test.port.close()
 		startupV2(port)
+		quit()
 	test.port.close()
 
 
@@ -79,6 +80,7 @@ for port in ["/dev/ttyUSB0","/dev/ttyS1","/dev/ttyS0"]:
 	if micon_version:
 		test.port.close()
 		startupV3(port)
+		quit()
 	test.port.close()
 
 quit()
