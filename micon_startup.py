@@ -9,6 +9,9 @@ import platform
 def startupV2(port):
 	test = libmicon.micon_api(port)
 
+	micon_version = test.send_read_cmd(0x83)
+	micon_version=micon_version.decode('utf-8')
+
 	##disable boot watchdog
 	test.send_write_cmd(0,0x03)
 
