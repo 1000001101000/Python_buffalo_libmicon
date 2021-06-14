@@ -9,7 +9,10 @@ So far It has been tested on these model Terastations/Linkstations running Debia
 * TS-WVHL/QVHL/6VHL/8VHL/RVHL (Intel-based Terastation Pro)
 * TS1000 Series (except the TS1200)
 * TS3000 Series
+* TS3010 Series
 * TS5000 Series
+* TS5020 Series
+* TS6000 Series
 * TS-XEL (Terastation ES)
 * TS-WXL/XL/RXL (Terastation III)
 * TS-HTGL (Terastation II Pro)
