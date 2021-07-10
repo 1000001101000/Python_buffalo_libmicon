@@ -4,7 +4,7 @@ import time
 import datetime
 import math
 import serial
-from serial import Serial
+import sys
 
 retry_count = 3
 
@@ -63,7 +63,7 @@ serialmode_console = 0x0f
 serialmode_ups = 0x10
 ups_linefail_off = 0x11
 ups_linefail_on = 0x12
-ups_vender_apc = 0x13
+ups_vender_apc = 0x13  # their spelling, not mine
 ups_vender_omron = 0x14
 lcd_disp_temp_on = 0x15
 lcd_disp_temp_off = 0x16
@@ -122,7 +122,6 @@ SATA_LED_ONOFF = 0x58
 SATA_LED_BLINK = 0x59
 
 SATA_ALL_LED = [0xFF, 0xFF]
-SATA_ALL_GREEN = [0x00, 0xFF]
 SATA_ALL_RED = [0xFF, 0x00]
 SATA1_RED = [0x01, 0x00]
 SATA2_RED = [0x02, 0x00]
@@ -181,11 +180,12 @@ class micon_api:
                                   stopbits=serial.STOPBITS_ONE, timeout=0.25)
         self.send_preamble()
 
-    def calc_check_byte(self, bytes):
+    @staticmethod
+    def calc_check_byte(inputbytes):
         checkbyte = 0x00
-        if type(bytes) == int:
-            bytes = bytearray([bytes])
-        for byte in bytes:
+        if type(inputbytes) == int:
+            inputbytes = bytearray([inputbytes])
+        for byte in inputbytes:
             checkbyte += byte
             checkbyte %= 256
         checkbyte ^= 0xFF
@@ -193,11 +193,12 @@ class micon_api:
         checkbyte %= 256
         return checkbyte
 
-    def calc_checksum(self, bytes):
+    @staticmethod
+    def calc_checksum(inputbytes):
         checksum = 0x00
-        if type(bytes) == int:
-            bytes = bytearray([bytes])
-        for byte in bytes:
+        if type(inputbytes) == int:
+            inputbytes = bytearray([inputbytes])
+        for byte in inputbytes:
             checksum += byte
         checksum %= 256
         return checksum
@@ -212,7 +213,6 @@ class micon_api:
         self.send_bytes(preamble)
 
     def send_cmd(self, cmdbytes):
-        response = bytearray()
         cmdbytes.append(self.calc_check_byte(cmdbytes))
         if self.debug != 0:
             print("sending : ", bytes(cmdbytes).hex(), "\tchecksum: ", self.calc_checksum(cmdbytes), "\tlength: ",
@@ -221,7 +221,7 @@ class micon_api:
             self.send_bytes(cmdbytes)
             response = self.get_response()
             if type(response) == int:
-                response = bytearray([response])
+                response = bytearray(response.to_bytes(1, sys.byteorder))
             if response is None:
                 print("no response")
                 continue
@@ -232,8 +232,6 @@ class micon_api:
                 response_type = response[0] & 0x80
                 resp_len = response[0] & 0x7F
                 resp_data = response[2:2 + resp_len]
-                resp_code = 0
-                resp_str = ""
                 if response_type == 0:
                     resp_code = response[2]
                     if resp_code == 0:
@@ -271,14 +269,15 @@ class micon_api:
                 print("invalid response")
                 continue
             output = bytearray()
-            for x in range(response_len):
-                output.append(response[x + 2])
+            for y in range(response_len):
+                output.append(response[y + 2])
             return output
 
-    def send_write_cmd(self, length, addrbyte, databytes=""):
+    def send_write_cmd(self, length, addrbyte, databytes=bytearray()):
         # validate length or perhaps stop requiring it or something
         if type(databytes) == int:
-            databytes = bytearray([databytes])
+            databytes = bytearray(databytes.to_bytes(1, sys.byteorder))
+
         cmdbytes = bytearray()
         cmdbytes.append(length)
         cmdbytes.append(addrbyte)
@@ -376,11 +375,11 @@ class micon_api:
         else:
             led_status[0] |= led_mask[0]
             led_status[1] |= led_mask[1]
-        self.send_write_cmd(1, 0x32, led_status[0])
-        self.send_write_cmd(1, 0x40, led_status[1])
+        self.send_write_cmd(1, 0x32, bytearray(led_status[0].to_bytes(1, sys.byteorder)))
+        self.send_write_cmd(1, 0x40, bytearray(led_status[1].to_bytes(1, sys.byteorder)))
 
     def cmd_force_lcd_disp(self, dispbyte):
-        self.send_write_cmd(0, dispbyte, "")
+        self.send_write_cmd(0, dispbyte)
 
     def set_lcd_buffer(self, bufferbyte, row1, row2):
         row1 = row1.ljust(16)
@@ -400,16 +399,16 @@ class micon_api:
         self.send_write_cmd(16, bufferbyte, messagebytes)
 
     def set_lcd_date(self):
-        currentDT = datetime.datetime.now()
+        currentdate = datetime.datetime.now()
         # made sure it could go beyond 2099 because we must never forget Y2K
         # 1-byte ensures it will only go to 2255 but future generations can deal with that.
-        year = int(currentDT.strftime('%Y')) - 2000
-        mon = int(currentDT.strftime('%m'))
-        day = int(currentDT.strftime('%d'))
-        hour = int(currentDT.strftime('%H'))
-        min = int(currentDT.strftime('%M'))
-        sec = int(currentDT.strftime('%S'))
-        output = bytearray([year, mon, day, hour, min, sec])
+        year = int(currentdate.strftime('%Y')) - 2000
+        mon = int(currentdate.strftime('%m'))
+        day = int(currentdate.strftime('%d'))
+        hour = int(currentdate.strftime('%H'))
+        minute = int(currentdate.strftime('%M'))
+        sec = int(currentdate.strftime('%S'))
+        output = bytearray([year, mon, day, hour, minute, sec])
         self.send_write_cmd(6, lcd_set_date, output)
 
     def set_lcd_drives(self, drive1, drive2, drive3, drive4):
