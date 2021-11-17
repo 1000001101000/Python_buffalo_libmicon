@@ -24,7 +24,9 @@ So far It has been tested on these model Terastations/Linkstations running Debia
 
 Debian:
 
-`apt-get install python3 python3-pip`
+`apt-get install python3 python3-serial`
+
+or
 
 `pip3-install pyserial`
 
